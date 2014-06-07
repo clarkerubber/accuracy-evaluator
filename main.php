@@ -25,15 +25,18 @@ function eval_loss ( $moves, $side ) {
 	return ($side == 'white')? $net / $withEval : -1 * $net / $withEval;
 }
 
-function main ( $user, $nb = 100, $url = "http://en.lichess.org/api/game" ) {
-	if ( ( $games = json_decode( file_get_contents( "$url?username=$user&rated=1&&analysed=1&with_analysis=1&nb=$nb" ), TRUE ) ) !== FALSE ) { 
+function main ( $user, $rated = 1, $nb = 100, $url = "http://en.lichess.org/api/game" ) {
+	if ( ( $games = json_decode( file_get_contents( "$url?username=$user&rated=$rated&&analysed=1&with_analysis=1&nb=$nb" ), TRUE ) ) !== FALSE ) { 
 		foreach ( $games['list'] as $key => $game ) {
 			$side = ( $game['players']['white']['userId'] == $user )? 'white' : 'black';
 			$loss = eval_loss ( $game['analysis'],  $side );
-			echo str_pad( intval ( $loss ), 4, ' ', STR_PAD_LEFT) .' '. str_pad ( '', intval ( $loss/10 ), '=' ) ."\n";
+			echo $game['players']['white']['userId']." VS ".$game['players']['black']['userId']."\n";
+			echo str_pad( intval ( $loss ), 4, ' ', STR_PAD_LEFT) .' '. str_pad ( '', intval ( $loss/10 ), '=' ) ."\n\n";
 		}
 	}
 
 }
 
-main( 'josopinka' );
+if ( isset ( $argv[1] ) ) {
+	main ( $argv[1] );
+}
